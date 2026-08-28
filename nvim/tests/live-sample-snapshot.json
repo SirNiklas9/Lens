@@ -1,0 +1,15 @@
+{
+  "version": "inspector.snapshot.v1",
+  "active": {"directory": "C:/dev/inspector", "global": "everywhere", "workspace": "dev", "project": "inspector", "sources": ["Lexicon"]},
+  "context": {"mode": "delta", "session_id": "lens-test", "rule_count": 2, "knowledge_count": 3},
+  "health": {"state": "healthy", "services": []},
+  "threads": [{"version": "atlas.thread.v1", "root": "C:/dev/inspector", "entry": {"id": "live", "name": "applyLive", "kind": "func", "file": "inspector/live_source.go", "line": 65}, "nodes": [{"symbol": {"id": "live", "name": "applyLive", "kind": "func", "file": "inspector/live_source.go", "line": 65}}]}],
+  "live": {
+    "version": "lens.live.v1",
+    "task_id": "task-1",
+    "goal": "Fix link ordering",
+    "current": {"kind": "edit.started", "file": "inspector/live_source.go", "start_line": 65, "end_line": 65, "symbol": "applyLive", "why": "validate source first"},
+    "review_queue": [{"id": "change", "state": "PASSING", "file": "inspector/live_source.go", "start_line": 65, "end_line": 89, "symbol": "applyLive", "why": "validation before removal", "event_id": "change"}],
+    "validation": [{"id": "test", "kind": "validation.passed", "state": "PASSED", "target": "inspector/live_source.go", "message": "go test ./inspector"}]
+  }
+}

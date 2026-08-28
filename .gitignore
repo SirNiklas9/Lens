@@ -1,0 +1,7 @@
+.gocache/
+.gocache-*/
+.gomodcache-*/
+*.exe
+bin/
+target/
+.nvimlog

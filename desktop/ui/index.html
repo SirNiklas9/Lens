@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Inspector</title>
+    <style>
+      :root { color-scheme: dark; font-family: ui-sans-serif, system-ui, sans-serif; background:#111827; color:#e5e7eb; }
+      body { margin:0; } header { display:flex; align-items:center; gap:12px; padding:18px 24px; border-bottom:1px solid #273449; }
+      h1 { font-size:20px; margin:0; } #state { font-size:13px; color:#9ca3af; } button { margin-left:auto; padding:7px 12px; border:1px solid #41516b; border-radius:6px; color:inherit; background:#1f2937; cursor:pointer; }
+      main { padding:20px 24px 40px; display:grid; gap:16px; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); }
+      section { border:1px solid #273449; border-radius:8px; padding:14px; background:#172033; } section.wide { grid-column:1/-1; }
+      h2 { margin:0 0 9px; font-size:14px; color:#cbd5e1; } dl { display:grid; grid-template-columns:max-content 1fr; gap:6px 12px; margin:0; font-size:13px; } dt { color:#94a3b8; } dd { margin:0; overflow-wrap:anywhere; }
+      .healthy { color:#5eead4; } .degraded,.unavailable { color:#fbbf24; } .error { color:#fca5a5; } pre { margin:0; white-space:pre-wrap; font:12px ui-monospace,Consolas,monospace; color:#cbd5e1; }
+      ul { padding-left:18px; margin:6px 0 0; } li { font-size:13px; margin:4px 0; }
+    </style>
+  </head>
+  <body>
+    <header><h1>Inspector</h1><span id="state">Connecting to local API…</span><button id="refresh">Refresh</button></header>
+    <main id="app"></main>
+    <script>
+      const app = document.querySelector('#app'); const state = document.querySelector('#state');
+      const esc = value => String(value ?? '—').replace(/[&<>\"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+      const section = (title, body, wide=false) => `<section class="${wide?'wide':''}"><h2>${title}</h2>${body}</section>`;
+      const details = entries => `<dl>${entries.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>`;
+      const pretty = value => `<pre>${esc(JSON.stringify(value ?? {state:'not available'}, null, 2))}</pre>`;
+      function render(s) {
+        const health = s.health || {}; const active = s.active || {}; const context = s.context || {};
+        state.className = health.state || 'unavailable'; state.textContent = `Local API · ${health.state || 'unavailable'} · ${s.generated_at || ''}`;
+        const services = (health.services || []).map(x => `<li><span class="${esc(x.state)}">${esc(x.state)}</span> · ${esc(x.name)}${x.message?`: ${esc(x.message)`:''}</li>`).join('') || '<li>No source adapters are currently available.</li>';
+        app.innerHTML = [
+          section('Active scope', details([['Directory',active.directory],['Global',active.global],['Workspace',active.workspace],['Project',active.project],['Sources',(active.sources||[]).join(', ')]])),
+          section('Context delta', details([['Mode',context.mode],['Session',context.session_id],['Manifest digest',context.manifest_digest],['Rules',context.rule_count],['Knowledge',context.knowledge_count],['Code map',context.code_map_version]])),
+          section('Health', `<ul>${services}</ul>`),
+          section('Lexicon', pretty(s.lexicon)), section('Scout proposals', pretty(s.scout)),
+          section('Splice status', pretty(s.splice || s.pith)), section('Trace / test evidence', pretty(s.receipts)),
+          section('Legacy migration status', pretty(s.legacy_projx), true)
+        ].join('');
+      }
+      async function refresh() {
+        try {
+          const api = await window.__TAURI__.core.invoke('api_url');
+          const response = await fetch(`${api}/v1/snapshot`, {cache:'no-store'});
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          render(await response.json());
+        } catch (error) {
+          state.className='error'; state.textContent=`Local Inspector API unavailable: ${error.message}`;
+          app.innerHTML=section('Waiting for Inspector API', '<p>Start Inspector with its explicitly configured read-only source adapters, then refresh. This window has made no changes.</p>', true);
+        }
+      }
+      document.querySelector('#refresh').addEventListener('click', refresh); refresh(); setInterval(refresh, 5000);
+    </script>
+  </body>
+</html>

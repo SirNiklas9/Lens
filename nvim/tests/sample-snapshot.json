@@ -1,0 +1,11 @@
+{
+  "version": "inspector.snapshot.v1",
+  "generated_at": "2026-08-09T00:00:00Z",
+  "active": {"directory": "/work/example", "global": "everywhere", "workspace": "work", "project": "example", "sources": ["global", "workspace", "project"]},
+  "health": {"state": "healthy", "services": [{"name": "lexicon", "state": "healthy"}, {"name": "scout", "state": "healthy"}]},
+  "context": {"session_id": "fixture", "manifest_digest": "abc123", "mode": "delta", "rule_count": 3, "knowledge_count": 2, "code_map_version": "external-v1"},
+  "lexicon": {"freshness": "current"},
+  "scout": {"proposals": 1},
+  "pith": {"pending": false},
+  "receipts": {"recent": 2}
+}
