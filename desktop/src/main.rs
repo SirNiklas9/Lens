@@ -32,7 +32,7 @@ fn api_url(state: State<'_, AppState>) -> String {
 }
 
 fn main() {
-    let api_url = match configured_api_url() {
+    let configured_url = match configured_api_url() {
         Ok(value) => value,
         Err(error) => {
             eprintln!("Inspector Desktop: {error}");
@@ -40,7 +40,9 @@ fn main() {
         }
     };
     tauri::Builder::default()
-        .manage(AppState { api_url })
+        .manage(AppState {
+            api_url: configured_url,
+        })
         .invoke_handler(tauri::generate_handler![api_url])
         .run(tauri::generate_context!())
         .expect("Inspector Desktop failed to run");
